@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Imposteur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A18; --bg2:#100F2A; --surface:#1A1934; --surface2:#252248; --line:#312e57;
+    --gold:#F5B72E; --gold-deep:#E29310; --red:#E23E57; --red-deep:#c02745;
+    --green:#29C46A; --green-deep:#1fa257; --blue:#6C8CFF; --purple:#9B7BFF;
+    --text:#F4F4FB; --muted:#8f8fb6; --r:22px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
+    -webkit-user-select:none;user-select:none;
+    background:radial-gradient(120% 70% at 50% -10%,#1c1a44 0%,rgba(28,26,68,0) 55%),var(--bg);
+  }
+  input{-webkit-user-select:text;user-select:text}
+  .app{height:100dvh;max-width:520px;margin:0 auto;position:relative}
+  h1,h2,.brand,.big,.f{font-family:'Fredoka',sans-serif}
+  .screen{position:absolute;inset:0;padding:calc(env(safe-area-inset-top) + 16px) 20px calc(env(safe-area-inset-bottom) + 18px);
+    display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .screen.active{display:flex;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* header */
+  .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .hdr .icons{display:flex;gap:8px}
+  .ico{width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line);
+    display:grid;place-items:center;font-size:18px;cursor:pointer;transition:.12s}
+  .ico:active{transform:scale(.9)}
+  .ico.off{opacity:.45}
+  .brandwrap{display:flex;align-items:center;gap:11px}
+  .mask{width:42px;height:42px;border-radius:50%;background:linear-gradient(140deg,var(--gold),var(--gold-deep));
+    display:grid;place-items:center;font-size:22px;box-shadow:0 8px 22px rgba(245,183,46,.35)}
+  .brand{font-size:30px;font-weight:700;letter-spacing:.5px;
+    background:linear-gradient(120deg,#FCD34D,var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tagline{text-align:center;color:var(--muted);font-size:14px;margin:12px 0 16px;line-height:1.5}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+  .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.4px;font-weight:600;margin-bottom:12px}
+
+  /* segmented mode */
+  .seg{display:flex;background:var(--surface2);border-radius:16px;padding:5px;gap:5px}
+  .seg .opt{flex:1;text-align:center;padding:11px 4px;border-radius:12px;font-family:'Fredoka';font-weight:600;font-size:15px;color:var(--muted);cursor:pointer;transition:.15s}
+  .seg .opt.on{background:linear-gradient(135deg,#FCD34D,var(--gold-deep));color:#0c0c16;box-shadow:0 4px 14px rgba(245,183,46,.3)}
+  .mode-desc{font-size:13px;color:var(--muted);margin-top:11px;line-height:1.5;min-height:18px}
+
+  .stepper{display:flex;align-items:center;justify-content:space-between}
+  .stepper .val{font-family:'Fredoka';font-size:38px;font-weight:600;min-width:56px;text-align:center}
+  .rnd-btn{width:50px;height:50px;border-radius:15px;border:1px solid var(--line);background:var(--surface2);
+    color:var(--text);font-size:24px;font-weight:600;display:grid;place-items:center;cursor:pointer;transition:.08s}
+  .rnd-btn:active{transform:scale(.9);background:#2e2b57}
+  .rnd-btn:disabled{opacity:.3;cursor:not-allowed}
+  .sub{color:var(--muted);font-size:12.5px;text-align:center;margin-top:8px}
+
+  .names-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .names-grid input{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;
+    color:var(--text);font-size:14.5px;font-family:'Inter';width:100%;outline:none}
+  .names-grid input:focus{border-color:var(--gold)}
+
+  .themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .theme{background:var(--surface2);border:2px solid transparent;border-radius:14px;padding:12px 4px;text-align:center;cursor:pointer;transition:.15s}
+  .theme .emo{font-size:24px;display:block;margin-bottom:5px}
+  .theme .nm{font-size:11px;font-weight:600;color:var(--muted)}
+  .theme.sel{border-color:var(--gold);background:#2a2540}
+  .theme.sel .nm{color:var(--text)}
+  .theme:active{transform:scale(.95)}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .toggle-row .t-txt{font-size:15px;font-weight:600;font-family:'Fredoka'}
+  .toggle-row .t-sub{font-size:12.5px;color:var(--muted);margin-top:3px;font-weight:400;max-width:235px;line-height:1.45}
+  .switch{width:52px;height:31px;border-radius:20px;background:var(--surface2);border:1px solid var(--line);position:relative;cursor:pointer;flex-shrink:0;transition:.2s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#6b6b90;transition:.2s}
+  .switch.on{background:var(--green)} .switch.on::after{left:26px;background:#fff}
+
+  .btn{width:100%;border:none;border-radius:18px;padding:17px;font-family:'Fredoka';font-size:19px;font-weight:600;
+    color:#0c0c16;cursor:pointer;transition:.08s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn:active{transform:scale(.97)}
+  .btn.gold{background:linear-gradient(135deg,#FCD34D,var(--gold-deep));box-shadow:0 10px 26px rgba(245,183,46,.3)}
+  .btn.green{background:linear-gradient(135deg,#3BE07F,var(--green-deep));color:#04180d;box-shadow:0 10px 26px rgba(41,196,106,.28)}
+  .btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--line);font-size:16px;padding:14px}
+  .btn.red{background:linear-gradient(135deg,#FF5A75,var(--red-deep));color:#fff}
+  .spacer{flex:1;min-height:12px}
+  .stack{display:flex;flex-direction:column;gap:11px}
+
+  /* pass */
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
+  .pass-num{font-family:'Fredoka';font-size:14px;color:var(--gold);font-weight:600;letter-spacing:2px;text-transform:uppercase}
+  .pass-name{font-family:'Fredoka';font-size:44px;font-weight:700;line-height:1.1;margin:6px 0;word-break:break-word}
+  .pass-hint{color:var(--muted);font-size:15px;max-width:290px;line-height:1.5}
+  .handoff{font-size:60px;margin-bottom:4px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.5))}
+  .progress{text-align:center;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:1px;margin-bottom:6px}
+
+  /* reveal card */
+  .reveal-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+  .rcard{width:100%;max-width:330px;aspect-ratio:3/4.05;position:relative;cursor:pointer}
+  .face{position:absolute;inset:0;border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:26px;text-align:center;backface-visibility:hidden;transition:transform .5s cubic-bezier(.4,.1,.2,1);border:1px solid var(--line)}
+  .face .kicker{font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:600;opacity:.85;margin-bottom:12px}
+  .front{background:radial-gradient(120% 90% at 50% 0,#26234b,var(--surface));transform:rotateY(0)}
+  .rcard.flip .front{transform:rotateY(180deg)}
+  .back{transform:rotateY(-180deg)} .rcard.flip .back{transform:rotateY(0)}
+  .back.civ{background:radial-gradient(130% 100% at 50% 0,#2b3d2e,#16281a);border-color:#2c6b3f}
+  .back.imp{background:radial-gradient(130% 100% at 50% 0,#4a2130,#25101a);border-color:#7a2a3d}
+  .back.neu{background:radial-gradient(130% 100% at 50% 0,#2a2a52,#181832);border-color:#3d3d78}
+  .front .tap-icon{font-size:58px;margin-bottom:14px}
+  .front .flip-hint{font-family:'Fredoka';font-size:21px;font-weight:600;color:var(--gold)}
+  .front .flip-sub{color:var(--muted);font-size:13.5px;margin-top:8px}
+  .back .word{font-family:'Fredoka';font-weight:700;font-size:42px;color:#fff;line-height:1.05}
+  .back .role{font-family:'Fredoka';font-size:32px;font-weight:700}
+  .back.imp .role{color:#FF8FA3}
+  .back .desc{font-size:14px;line-height:1.5;margin-top:14px;max-width:250px;opacity:.9}
+
+  /* discussion */
+  .h2{font-family:'Fredoka';font-size:24px;font-weight:700;text-align:center}
+  .meta{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 14px;font-weight:600;letter-spacing:.5px}
+  .starter{text-align:center;background:linear-gradient(135deg,rgba(245,183,46,.15),rgba(245,183,46,.04));border:1px solid rgba(245,183,46,.3);border-radius:16px;padding:15px;margin-bottom:12px}
+  .starter b{color:var(--gold);font-family:'Fredoka'}
+  .order{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:14px}
+  .chip{background:var(--surface2);border:1px solid var(--line);border-radius:20px;padding:7px 13px;font-size:13.5px;font-weight:600}
+  .chip.first{background:rgba(245,183,46,.16);border-color:var(--gold);color:var(--gold)}
+  .chip .idx{opacity:.5;margin-right:5px;font-size:12px}
+  .timer{font-family:'Fredoka';font-size:60px;font-weight:700;text-align:center;letter-spacing:2px;margin:6px 0 12px}
+  .timer.low{color:var(--red)}
+  .rule{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start;margin-bottom:9px}
+  .rule .n{width:24px;height:24px;flex-shrink:0;border-radius:7px;background:var(--gold);color:#0c0c16;font-family:'Fredoka';font-weight:700;font-size:13px;display:grid;place-items:center;margin-top:1px}
+  .rule .rt{font-size:14px;line-height:1.5;color:#d8d8ea}
+
+  /* vote */
+  .vote-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+  .voter{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:15px 10px;text-align:center;cursor:pointer;transition:.12s;font-family:'Fredoka';font-weight:600;font-size:15px;word-break:break-word}
+  .voter .av{font-size:24px;display:block;margin-bottom:5px}
+  .voter:active{transform:scale(.95);border-color:var(--gold)}
+
+  /* elimination */
+  .elim-emo{font-size:70px;text-align:center;filter:drop-shadow(0 8px 20px rgba(0,0,0,.4))}
+  .role-tag{display:inline-block;font-family:'Fredoka';font-weight:700;font-size:16px;padding:6px 16px;border-radius:20px;margin-top:6px}
+  .role-tag.civ{background:rgba(41,196,106,.18);color:#7fe3a6}
+  .role-tag.imp{background:rgba(226,62,87,.18);color:#ff8fa3}
+  .role-tag.white{background:rgba(255,255,255,.14);color:#fff}
+
+  /* guess */
+  .guess-in{background:var(--surface2);border:2px solid var(--line);border-radius:16px;padding:16px;color:var(--text);
+    font-size:20px;font-family:'Fredoka';font-weight:600;text-align:center;width:100%;outline:none}
+  .guess-in:focus{border-color:var(--gold)}
+
+  /* result */
+  .verdict{font-family:'Fredoka';font-size:38px;font-weight:700;text-align:center;line-height:1.1}
+  .verdict.win{color:var(--green)} .verdict.lose{color:var(--red)} .verdict.white{color:#fff}
+  .result-emo{font-size:70px;text-align:center;filter:drop-shadow(0 8px 20px rgba(0,0,0,.4))}
+  .info-line{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .info-line .k{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+  .info-line .v{font-family:'Fredoka';font-weight:600;font-size:16px;text-align:right}
+  .info-line .v.imp{color:#FF8FA3} .info-line .v.wd{color:var(--gold)} .info-line .v.civ{color:#7fe3a6}
+  .score{display:flex;gap:10px;margin:16px 0 4px}
+  .score .sc{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center}
+  .score .sc .n{font-family:'Fredoka';font-size:30px;font-weight:700}
+  .score .sc .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;font-weight:600}
+  .score .sc.c .n{color:#7fe3a6} .score .sc.i .n{color:#ff8fa3} .score .sc.w .n{color:#fff}
+
+  /* how to */
+  .ht{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:11px}
+  .ht h3{font-family:'Fredoka';font-size:17px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .ht p{font-size:14px;line-height:1.55;color:#c9c9e0}
+
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+  @media (prefers-reduced-motion:reduce){.screen{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HOME ============ -->
+  <section class="screen active" id="s-home">
+    <div class="hdr">
+      <div class="brandwrap"><div class="mask">🎭</div><div class="brand">Imposteur</div></div>
+      <div class="icons">
+        <div class="ico" id="ico-sound" title="Son">🔊</div>
+        <div class="ico" id="ico-help" title="Règles">?</div>
+      </div>
+    </div>
+    <p class="tagline">Un mot secret pour tous… sauf l'imposteur.<br>Bluffez, débattez, démasquez-le.</p>
+
+    <div class="card">
+      <div class="label">Mode de jeu</div>
+      <div class="seg" id="mode-seg">
+        <div class="opt on" data-mode="classic">Classique</div>
+        <div class="opt" data-mode="undercover">Undercover</div>
+      </div>
+      <div class="mode-desc" id="mode-desc"></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Joueurs</div>
+      <div class="stepper">
+        <button class="rnd-btn" id="pl-minus">−</button>
+        <div class="val" id="pl-val">4</div>
+        <button class="rnd-btn" id="pl-plus">+</button>
+      </div>
+      <div class="names-grid" id="names-grid" style="margin-top:14px"></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Imposteurs</div>
+      <div class="stepper">
+        <button class="rnd-btn" id="im-minus">−</button>
+        <div class="val" id="im-val">1</div>
+        <button class="rnd-btn" id="im-plus">+</button>
+      </div>
+      <div class="sub" id="im-sub">1 imposteur parmi les joueurs</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Thème des mots</div>
+      <div class="themes" id="themes"></div>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <div>
+          <div class="t-txt">Mr White 🃏</div>
+          <div class="t-sub">Un joueur sans aucun mot. Démasqué, il peut deviner le mot pour voler la victoire.</div>
+        </div>
+        <div class="switch" id="sw-white"></div>
+      </div>
+    </div>
+
+    <div class="card" id="hint-card">
+      <div class="toggle-row">
+        <div>
+          <div class="t-txt">Indice à l'imposteur</div>
+          <div class="t-sub">Il apprend le thème (mais pas le mot). Plus facile de se fondre dans la masse.</div>
+        </div>
+        <div class="switch" id="sw-hint"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <div>
+          <div class="t-txt">Minuteur de tour</div>
+          <div class="t-sub" id="timer-sub">Désactivé — débattez sans limite</div>
+        </div>
+        <div class="switch" id="sw-timer"></div>
+      </div>
+    </div>
+
+    <button class="btn green" id="start-btn">Distribuer les rôles</button>
+    <div style="height:4px"></div>
+  </section>
+
+  <!-- ============ HELP ============ -->
+  <section class="screen" id="s-help">
+    <div class="hdr"><div class="brandwrap"><div class="mask">🎭</div><div class="brand" style="font-size:24px">Comment jouer</div></div>
+      <div class="ico" id="help-close">✕</div></div>
+    <div style="margin-top:12px">
+      <div class="ht"><h3>🎯 Le but</h3><p>Tout le monde reçoit un mot secret, sauf l'imposteur. Les innocents doivent le démasquer ; l'imposteur doit survivre sans se faire repérer.</p></div>
+      <div class="ht"><h3>🃏 La distribution</h3><p>On se passe le téléphone. Chacun retourne sa carte en secret pour voir son rôle, puis passe au suivant.</p></div>
+      <div class="ht"><h3>💬 Le tour de table</h3><p>Chacun son tour, dites <b>un seul mot</b> lié au mot secret — sans le dire en entier. L'imposteur improvise pour se fondre dans la masse.</p></div>
+      <div class="ht"><h3>🗳️ Le vote</h3><p>Après discussion, le groupe accuse un joueur. On révèle son rôle. Tant que le camp gagnant n'est pas décidé, on relance un tour avec les survivants.</p></div>
+      <div class="ht"><h3>🏆 Qui gagne ?</h3><p><b>Innocents</b> : tous les imposteurs (et Mr White) éliminés. <b>Imposteurs</b> : ils deviennent aussi nombreux que les innocents. <b>Mr White</b> : démasqué, il devine le mot secret et rafle tout.</p></div>
+      <div class="ht"><h3>🎭 Classique vs Undercover</h3><p><b>Classique</b> : l'imposteur sait qu'il l'est, sans mot. <b>Undercover</b> : il reçoit un mot <i>cousin</i> (Pizza / Tarte) et ne sait même pas qu'il est l'imposteur. À vous de sentir qui a le mot bizarre.</p></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn gold" id="help-back">Compris</button>
+  </section>
+
+  <!-- ============ PASS ============ -->
+  <section class="screen" id="s-pass">
+    <div class="progress" id="pass-prog"></div>
+    <div class="center">
+      <div class="handoff">📱➡️</div>
+      <div class="pass-num" id="pass-num"></div>
+      <div class="pass-name" id="pass-name"></div>
+      <div class="pass-hint">Prends le téléphone, découvre ton rôle en secret, puis passe-le au suivant.</div>
+    </div>
+    <button class="btn gold" id="pass-btn">Voir mon rôle</button>
+  </section>
+
+  <!-- ============ REVEAL ============ -->
+  <section class="screen" id="s-reveal">
+    <div class="progress" id="rev-name"></div>
+    <div class="reveal-wrap">
+      <div class="rcard" id="rcard">
+        <div class="face front">
+          <div class="tap-icon">🃏</div>
+          <div class="flip-hint">Touche pour révéler</div>
+          <div class="flip-sub">Cache l'écran des autres</div>
+        </div>
+        <div class="face back" id="rcard-back">
+          <div class="kicker" id="back-kicker"></div>
+          <div id="back-body"></div>
+          <div class="desc" id="back-desc"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn ghost" id="reveal-next" style="visibility:hidden">J'ai mémorisé →</button>
+  </section>
+
+  <!-- ============ DISCUSS ============ -->
+  <section class="screen" id="s-discuss">
+    <div class="h2" id="disc-title">Discussion</div>
+    <div class="meta" id="disc-meta"></div>
+    <div class="starter" id="disc-starter"></div>
+    <div class="order" id="disc-order"></div>
+    <div id="disc-timerbox" style="display:none"><div class="timer" id="timer-val">1:30</div></div>
+    <div id="disc-rules"></div>
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn gold" id="to-vote">Passer au vote</button>
+      <button class="btn ghost" id="discuss-quit">Quitter la partie</button>
+    </div>
+  </section>
+
+  <!-- ============ VOTE ============ -->
+  <section class="screen" id="s-vote">
+    <div class="h2">Le vote</div>
+    <p class="tagline" style="margin:8px 0 16px">Débattez, puis touchez le joueur que le groupe accuse.</p>
+    <div class="vote-grid" id="vote-grid"></div>
+    <div class="spacer"></div>
+    <button class="btn ghost" id="vote-back">← Retour discussion</button>
+  </section>
+
+  <!-- ============ ELIM ============ -->
+  <section class="screen" id="s-elim">
+    <div class="center" style="flex:none;margin-top:20px;gap:8px">
+      <div class="elim-emo" id="elim-emo">🎭</div>
+      <div class="pass-name" id="elim-name" style="font-size:36px"></div>
+      <div id="elim-roletag"></div>
+      <p class="pass-hint" id="elim-sub" style="margin-top:10px"></p>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn gold" id="elim-next">Continuer</button>
+  </section>
+
+  <!-- ============ GUESS (imposteur / Mr White) ============ -->
+  <section class="screen" id="s-guess">
+    <div class="center" style="flex:none;margin-top:24px;gap:8px">
+      <div class="elim-emo">🎯</div>
+      <div class="h2" id="guess-title">Dernière chance</div>
+      <p class="pass-hint" id="guess-sub" style="margin-top:6px"></p>
+    </div>
+    <div style="margin-top:22px">
+      <input class="guess-in" id="guess-input" placeholder="Le mot secret est…" autocomplete="off" autocapitalize="off">
+    </div>
+    <div class="spacer"></div>
+    <button class="btn red" id="guess-submit">Valider ma réponse</button>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="screen" id="s-result">
+    <div class="center" style="flex:none;margin-top:8px;gap:8px">
+      <div class="result-emo" id="res-emo">🎉</div>
+      <div class="verdict" id="res-verdict"></div>
+      <p class="pass-hint" id="res-sub" style="max-width:310px"></p>
+    </div>
+
+    <div class="stack" style="margin-top:18px">
+      <div class="info-line" id="res-word-line"><span class="k" id="res-word-k">Le mot secret</span><span class="v wd" id="res-word">—</span></div>
+      <div class="info-line" id="res-word2-line" style="display:none"><span class="k">Mot de l'imposteur</span><span class="v imp" id="res-word2">—</span></div>
+      <div class="info-line"><span class="k" id="res-imp-k">L'imposteur</span><span class="v imp" id="res-imp">—</span></div>
+      <div class="info-line" id="res-white-line" style="display:none"><span class="k">Mr White</span><span class="v" id="res-white">—</span></div>
+    </div>
+
+    <div class="score">
+      <div class="sc c"><div class="n" id="sc-civ">0</div><div class="l">Innocents</div></div>
+      <div class="sc i"><div class="n" id="sc-imp">0</div><div class="l">Imposteurs</div></div>
+      <div class="sc w" id="sc-white-box" style="display:none"><div class="n" id="sc-white">0</div><div class="l">Mr White</div></div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn green" id="replay">Rejouer (mêmes réglages)</button>
+      <button class="btn ghost" id="new-game">Nouvelle partie</button>
+    </div>
+  </section>
+
+</div>
+<canvas id="confetti"></canvas>
+
+<script>
+/* ======================= DONNÉES : paires [innocent, cousin] ======================= */
+const THEMES = [
+  { id:'food', emo:'🍔', nm:'Miam', pairs:[
+    ['Pizza','Tarte'],['Crêpe','Galette'],['Café','Thé'],['Frites','Chips'],['Sushi','Maki'],['Burger','Sandwich'],
+    ['Chocolat','Caramel'],['Croissant','Pain au chocolat'],['Glace','Sorbet'],['Soupe','Velouté'],['Fromage','Beurre'],
+    ['Miel','Confiture'],['Yaourt','Fromage blanc'],['Gâteau','Muffin'],['Pâtes','Riz'],['Cannelle','Vanille']]},
+  { id:'anim', emo:'🐘', nm:'Animaux', pairs:[
+    ['Lion','Tigre'],['Loup','Chien'],['Dauphin','Requin'],['Grenouille','Crapaud'],['Papillon','Libellule'],
+    ['Tortue','Escargot'],['Aigle','Faucon'],['Lapin','Lièvre'],['Alligator','Crocodile'],['Abeille','Guêpe'],
+    ['Corbeau','Pie'],['Souris','Rat'],['Léopard','Guépard'],['Phoque','Otarie'],['Âne','Cheval'],['Singe','Gorille']]},
+  { id:'sport', emo:'⚽', nm:'Sport', pairs:[
+    ['Football','Rugby'],['Tennis','Badminton'],['Ski','Snowboard'],['Boxe','Karaté'],['Natation','Plongée'],
+    ['Basket','Handball'],['Course','Marathon'],['Golf','Mini-golf'],['Vélo','Moto'],['Surf','Bodyboard'],
+    ['Escalade','Randonnée'],['Patinage','Roller'],['Volley','Beach-volley'],['Judo','Lutte'],['Fléchettes','Bowling']]},
+  { id:'lieu', emo:'🗺️', nm:'Lieux', pairs:[
+    ['Plage','Piscine'],['Hôpital','Clinique'],['Cinéma','Théâtre'],['Forêt','Jungle'],['Montagne','Colline'],
+    ['Restaurant','Cantine'],['Château','Palais'],['Bibliothèque','Librairie'],['Musée','Galerie'],['Aéroport','Gare'],
+    ['Marché','Supermarché'],['Prison','Cachot'],['École','Université'],['Désert','Savane'],['Église','Cathédrale']]},
+  { id:'job', emo:'👷', nm:'Métiers', pairs:[
+    ['Médecin','Infirmier'],['Boulanger','Pâtissier'],['Policier','Gendarme'],['Pompier','Secouriste'],['Professeur','Instituteur'],
+    ['Avocat','Juge'],['Cuisinier','Serveur'],['Coiffeur','Barbier'],['Pilote','Steward'],['Chanteur','Musicien'],
+    ['Peintre','Sculpteur'],['Menuisier','Charpentier'],['Jardinier','Fleuriste'],['Journaliste','Écrivain'],['Astronaute','Pilote']]},
+  { id:'obj', emo:'🪑', nm:'Objets', pairs:[
+    ['Parapluie','Parasol'],['Réveil','Montre'],['Bougie','Lampe'],['Balai','Serpillère'],['Marteau','Tournevis'],
+    ['Casque','Écouteurs'],['Valise','Sac à dos'],['Miroir','Vitre'],['Ventilateur','Climatiseur'],['Fourchette','Cuillère'],
+    ['Crayon','Stylo'],['Vélo','Trottinette'],['Couverture','Oreiller'],['Ciseaux','Couteau'],['Clé','Cadenas']]},
+  { id:'film', emo:'🎬', nm:'Ciné', pairs:[
+    ['Batman','Superman'],['Shrek','Madagascar'],['Star Wars','Star Trek'],['Harry Potter','Seigneur des Anneaux'],
+    ['Toy Story','Cars'],['Spider-Man','Iron Man'],['Le Roi Lion','Le Livre de la Jungle'],['La Reine des Neiges','Raiponce'],
+    ['Jurassic Park','King Kong'],['Matrix','Inception'],['James Bond','Mission Impossible'],['Rocky','Rambo'],
+    ['Titanic','Avatar'],['Le Parrain','Scarface']]},
+  { id:'fr', emo:'🇫🇷', nm:'France', pairs:[
+    ['Tour Eiffel','Arc de Triomphe'],['Baguette','Croissant'],['Camembert','Roquefort'],['Champagne','Vin rouge'],
+    ['Béret','Casquette'],['Métro','Tramway'],['Louvre','Versailles'],['Astérix','Tintin'],['Pétanque','Mölkky'],
+    ['TGV','RER'],['Napoléon','De Gaulle'],['Escargot','Cuisses de grenouille'],['Guyane','Martinique'],['Ariane','Soyouz']]},
+];
+const AVATARS=['🧑','👩','🧔','👱','🧑‍🦱','👩‍🦰','🧑‍🦳','👨','👩‍🦱','🧑‍🦰','👨‍🦳','👵','🧓','👴','🧑‍🦲','👲','🧕','👳','💁','🙋'];
+
+/* ======================= ÉTAT ======================= */
+let cfg = { mode:'classic', players:4, imposters:1, white:false, hint:false, timer:false, themeIdx:0, names:[] };
+let G = null;
+const TIMER_SECONDS = 90;
+let timerHandle=null, timerLeft=0;
+let sessionScore = { civ:0, imp:0, white:0 };
+let sound = true, audioCtx=null;
+let lastElim = null;
+
+/* ======================= UTILS ======================= */
+const $ = s => document.querySelector(s);
+const buzz = p => { try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} };
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); window.scrollTo&&window.scrollTo(0,0); $(id).scrollTop=0; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,''); }
+
+/* ======================= SON (Web Audio) ======================= */
+function tone(freq,dur,type='sine',vol=.16,delay=0){
+  if(!sound||!audioCtx) return;
+  const t=audioCtx.currentTime+delay;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.015);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+dur+.02);
+}
+const sfx={
+  flip:()=>tone(520,.12,'triangle',.14),
+  reveal:()=>{tone(440,.12,'sine',.14);tone(660,.16,'sine',.12,.08);},
+  tap:()=>tone(380,.06,'square',.08),
+  elim:()=>{tone(180,.28,'sawtooth',.14);tone(120,.32,'sine',.12,.05);},
+  win:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.3,'triangle',.16,i*.11));},
+  lose:()=>{[440,330,247].forEach((f,i)=>tone(f,.34,'sawtooth',.14,i*.13));},
+};
+function initAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume(); }
+
+/* ======================= SETUP UI ======================= */
+const MODE_DESC={
+  classic:"L'imposteur sait qu'il l'est et n'a aucun mot. À lui de bluffer sans se trahir.",
+  undercover:"Tout le monde a un mot, l'imposteur en a un cousin. Personne ne sait s'il est le traître : déduisez-le."
+};
+function renderModeUI(){
+  document.querySelectorAll('#mode-seg .opt').forEach(o=>o.classList.toggle('on',o.dataset.mode===cfg.mode));
+  $('#mode-desc').textContent = MODE_DESC[cfg.mode];
+  $('#hint-card').style.display = cfg.mode==='classic' ? '' : 'none';
+}
+document.querySelectorAll('#mode-seg .opt').forEach(o=>{
+  o.onclick=()=>{ cfg.mode=o.dataset.mode; buzz(8); sfx.tap(); renderModeUI(); };
+});
+function renderThemes(){
+  const box=$('#themes'); box.innerHTML='';
+  THEMES.forEach((t,i)=>{
+    const el=document.createElement('div');
+    el.className='theme'+(i===cfg.themeIdx?' sel':'');
+    el.innerHTML=`<span class="emo">${t.emo}</span><span class="nm">${t.nm}</span>`;
+    el.onclick=()=>{ cfg.themeIdx=i; buzz(8); sfx.tap(); renderThemes(); };
+    box.appendChild(el);
+  });
+}
+function renderNames(){
+  const grid=$('#names-grid'); const prev=[...grid.querySelectorAll('input')].map(x=>x.value);
+  grid.innerHTML='';
+  for(let i=0;i<cfg.players;i++){
+    const inp=document.createElement('input');
+    inp.type='text'; inp.maxLength=14; inp.placeholder=`Joueur ${i+1}`;
+    inp.value=prev[i]||''; inp.dataset.i=i;
+    grid.appendChild(inp);
+  }
+}
+function reservedRoles(){ return cfg.imposters + (cfg.white?1:0); }
+function maxImposters(){ // laisser au moins 2 innocents
+  return Math.max(1, cfg.players - 2 - (cfg.white?1:0));
+}
+function refreshCounts(){
+  $('#pl-val').textContent=cfg.players;
+  if(cfg.imposters>maxImposters()) cfg.imposters=maxImposters();
+  $('#im-val').textContent=cfg.imposters;
+  $('#im-sub').textContent=cfg.imposters===1?'1 imposteur parmi les joueurs':`${cfg.imposters} imposteurs parmi les joueurs`;
+  $('#pl-minus').disabled=cfg.players<=3;
+  $('#pl-plus').disabled=cfg.players>=20;
+  $('#im-minus').disabled=cfg.imposters<=1;
+  $('#im-plus').disabled=cfg.imposters>=maxImposters();
+}
+$('#pl-minus').onclick=()=>{ if(cfg.players>3){cfg.players--;buzz(8);sfx.tap();renderNames();refreshCounts();} };
+$('#pl-plus').onclick =()=>{ if(cfg.players<20){cfg.players++;buzz(8);sfx.tap();renderNames();refreshCounts();} };
+$('#im-minus').onclick=()=>{ if(cfg.imposters>1){cfg.imposters--;buzz(8);sfx.tap();refreshCounts();} };
+$('#im-plus').onclick =()=>{ if(cfg.imposters<maxImposters()){cfg.imposters++;buzz(8);sfx.tap();refreshCounts();} };
+$('#sw-white').onclick=function(){ cfg.white=!cfg.white; this.classList.toggle('on',cfg.white); buzz(8);sfx.tap(); refreshCounts(); };
+$('#sw-hint').onclick =function(){ cfg.hint=!cfg.hint; this.classList.toggle('on',cfg.hint); buzz(8);sfx.tap(); };
+$('#sw-timer').onclick=function(){ cfg.timer=!cfg.timer; this.classList.toggle('on',cfg.timer); buzz(8);sfx.tap();
+  $('#timer-sub').textContent=cfg.timer?'1 min 30 par tour de table':'Désactivé — débattez sans limite'; };
+
+$('#ico-sound').onclick=function(){ sound=!sound; this.textContent=sound?'🔊':'🔇'; this.classList.toggle('off',!sound); if(sound){initAudio();sfx.tap();} };
+$('#ico-help').onclick=()=>{ sfx.tap(); show('#s-help'); };
+$('#help-close').onclick=$('#help-back').onclick=()=>{ sfx.tap(); show('#s-home'); };
+
+/* ======================= DÉMARRAGE ======================= */
+$('#start-btn').onclick=()=>{
+  initAudio(); buzz(12); sfx.reveal();
+  const inputs=[...$('#names-grid').querySelectorAll('input')];
+  cfg.names=inputs.map((inp,i)=> inp.value.trim() || `Joueur ${i+1}`);
+  newGame();
+};
+function newGame(){
+  const n=cfg.players;
+  const theme=THEMES[cfg.themeIdx];
+  const pair=theme.pairs[Math.floor(Math.random()*theme.pairs.length)];
+  const wordCiv=pair[0], wordImp=pair[1];
+
+  // rôles
+  const roles=Array(n).fill('civ');
+  const slots=shuffle([...Array(n).keys()]);
+  let p=0;
+  for(let k=0;k<cfg.imposters;k++) roles[slots[p++]]='imp';
+  if(cfg.white) roles[slots[p++]]='white';
+
+  const alive=Array(n).fill(true);
+  G={ names:[...cfg.names], roles, wordCiv, wordImp, theme, mode:cfg.mode,
+      alive, revealIdx:0, round:0 };
+  goToReveal(0);
+}
+
+/* ---------- PASS / REVEAL ---------- */
+function goToReveal(i){
+  G.revealIdx=i;
+  $('#pass-num').textContent=`Joueur ${i+1} / ${cfg.players}`;
+  $('#pass-name').textContent=G.names[i];
+  show('#s-pass');
+}
+$('#pass-btn').onclick=()=>{ sfx.tap(); buzz(8);
+  const i=G.revealIdx;
+  $('#rev-name').textContent=G.names[i];
+  $('#rcard').classList.remove('flip');
+  $('#reveal-next').style.visibility='hidden';
+  const back=$('#rcard-back'), body=$('#back-body'), desc=$('#back-desc'), kick=$('#back-kicker');
+  const role=G.roles[i], mode=G.mode;
+
+  if(role==='white'){
+    back.className='face back imp'; kick.textContent='Chut… 🤫';
+    body.innerHTML='<div class="role">Mr White</div>';
+    desc.textContent="Tu n'as aucun mot. Écoute, bluffe, et si tu te fais prendre, tente de deviner le mot pour tout rafler.";
+  } else if(mode==='classic'){
+    if(role==='imp'){
+      back.className='face back imp'; kick.textContent='Chut… 🤫';
+      body.innerHTML='<div class="role">Imposteur</div>';
+      desc.textContent=cfg.hint?`Pas de mot. Indice : thème « ${G.theme.nm} ». Bluffe pour te fondre dans la masse.`
+                                :`Tu ne connais pas le mot secret. Écoute les autres et bluffe sans te trahir.`;
+    } else {
+      back.className='face back civ'; kick.textContent='Ton mot secret';
+      body.innerHTML=`<div class="word">${G.wordCiv}</div>`;
+      desc.textContent="Garde-le secret. Donne un indice sans le dire… et sans être trop évident.";
+    }
+  } else { // undercover : aucune couleur ne trahit le rôle
+    back.className='face back neu'; kick.textContent='Ton mot';
+    const w = role==='imp' ? G.wordImp : G.wordCiv;
+    body.innerHTML=`<div class="word">${w}</div>`;
+    desc.textContent="Tu as peut-être le mot de la majorité… ou pas. À toi de le sentir aux indices des autres.";
+  }
+  show('#s-reveal');
+};
+$('#rcard').onclick=function(){
+  if(this.classList.contains('flip')) return;
+  this.classList.add('flip'); buzz(14); sfx.flip();
+  setTimeout(()=>{ sfx.reveal(); $('#reveal-next').style.visibility='visible'; },300);
+};
+$('#reveal-next').onclick=()=>{ sfx.tap();
+  const next=G.revealIdx+1;
+  if(next<cfg.players) goToReveal(next);
+  else startRound(true);
+};
+
+/* ---------- MANCHE / DISCUSSION ---------- */
+function aliveIdx(){ return G.names.map((_,i)=>i).filter(i=>G.alive[i]); }
+function cnt(role){ return G.names.filter((_,i)=>G.alive[i]&&G.roles[i]===role).length; }
+
+function startRound(first){
+  G.round++;
+  stopTimer();
+  const alive=aliveIdx();
+  // ordre de parole : mélangé, premier de préférence non-imposteur/non-white
+  const order=shuffle([...alive]);
+  const firstNonImp=order.find(i=>G.roles[i]==='civ');
+  if(firstNonImp!==undefined){ order.splice(order.indexOf(firstNonImp),1); order.unshift(firstNonImp); }
+  G.order=order;
+
+  $('#disc-title').textContent = first?'Discussion' : `Tour ${G.round}`;
+  $('#disc-meta').textContent = `${alive.length} joueurs en lice · ${cnt('imp')+cnt('white')} suspect${(cnt('imp')+cnt('white'))>1?'s':''} restant${(cnt('imp')+cnt('white'))>1?'s':''}`;
+  $('#disc-starter').innerHTML = `C'est <b>${G.names[order[0]]}</b> qui commence.`;
+
+  const oc=$('#disc-order'); oc.innerHTML='';
+  order.forEach((idx,k)=>{
+    const c=document.createElement('div');
+    c.className='chip'+(k===0?' first':'');
+    c.innerHTML=`<span class="idx">${k+1}</span>${G.names[idx]}`;
+    oc.appendChild(c);
+  });
+
+  const rulesBox=$('#disc-rules');
+  if(first){
+    rulesBox.innerHTML=`
+      <div class="rule"><div class="n">1</div><div class="rt">Chacun son tour, dis <b>un seul mot</b> lié au mot secret — jamais le mot lui-même.</div></div>
+      <div class="rule"><div class="n">2</div><div class="rt">${G.mode==='undercover'?'Personne ne sait s\'il est l\'imposteur : repère qui donne des indices un peu « à côté ».':'L\'imposteur ne connaît pas le mot : il improvise pour se fondre dans la masse.'}</div></div>
+      <div class="rule"><div class="n">3</div><div class="rt">Débattez, puis passez au vote pour éliminer un suspect.</div></div>`;
+  } else {
+    rulesBox.innerHTML=`<div class="rule"><div class="n">↻</div><div class="rt">Nouveau tour de table entre les survivants. Affinez vos soupçons, puis revotez.</div></div>`;
+  }
+
+  const tb=$('#disc-timerbox');
+  if(cfg.timer){ tb.style.display='block'; timerLeft=TIMER_SECONDS; renderTimer();
+    timerHandle=setInterval(()=>{ timerLeft--; renderTimer(); if(timerLeft<=0){ stopTimer(); buzz([120,60,120]); sfx.lose(); } },1000);
+  } else tb.style.display='none';
+
+  show('#s-discuss');
+}
+function renderTimer(){ const m=Math.floor(timerLeft/60),s=timerLeft%60;
+  const el=$('#timer-val'); el.textContent=`${m}:${s.toString().padStart(2,'0')}`; el.classList.toggle('low',timerLeft<=10); }
+function stopTimer(){ if(timerHandle){clearInterval(timerHandle);timerHandle=null;} }
+$('#to-vote').onclick=()=>{ stopTimer(); sfx.tap(); buildVote(); show('#s-vote'); };
+$('#discuss-quit').onclick=()=>{ stopTimer(); sfx.tap(); show('#s-home'); };
+
+/* ---------- VOTE ---------- */
+function buildVote(){
+  const grid=$('#vote-grid'); grid.innerHTML='';
+  aliveIdx().forEach(i=>{
+    const el=document.createElement('div'); el.className='voter';
+    el.innerHTML=`<span class="av">${AVATARS[i%AVATARS.length]}</span>${G.names[i]}`;
+    el.onclick=()=>onVote(i);
+    grid.appendChild(el);
+  });
+}
+$('#vote-back').onclick=()=>{ sfx.tap(); startRound(false); };
+
+function onVote(idx){
+  buzz(30); sfx.elim();
+  G.alive[idx]=false;
+  lastElim={idx,role:G.roles[idx]};
+  const role=G.roles[idx];
+  $('#elim-name').textContent=G.names[idx];
+  const tag=$('#elim-roletag');
+  const emo=$('#elim-emo'), sub=$('#elim-sub');
+  if(role==='civ'){
+    emo.textContent='😱'; tag.innerHTML='<span class="role-tag civ">Innocent</span>';
+    sub.textContent="Raté… c'était un innocent. Le suspect court toujours.";
+  } else if(role==='imp'){
+    emo.textContent='🎯'; tag.innerHTML='<span class="role-tag imp">Imposteur</span>';
+    sub.textContent="Touché ! Un imposteur vient de tomber.";
+  } else {
+    emo.textContent='🃏'; tag.innerHTML='<span class="role-tag white">Mr White</span>';
+    sub.textContent="C'était Mr White ! Il a droit à une dernière chance…";
+  }
+  show('#s-elim');
+}
+$('#elim-next').onclick=()=>{ sfx.tap(); handlePostElim(); };
+
+function handlePostElim(){
+  const {idx,role}=lastElim;
+  if(role==='white'){ openGuess('white',idx); return; }
+  // imposteur classique : s'il était le dernier suspect, il tente le mot pour voler la partie
+  if(role==='imp' && G.mode==='classic' && cnt('imp')===0 && cnt('white')===0){ openGuess('imp',idx); return; }
+  proceed();
+}
+function proceed(){
+  const w=checkWin();
+  if(w) return gameOver(w.side);
+  startRound(false);
+}
+function checkWin(){
+  const imp=cnt('imp'), white=cnt('white'), civ=cnt('civ');
+  if(imp===0 && white===0) return {side:'civ'};
+  if(civ===0) return {side:'imp'};                 // suspects derniers en lice
+  if(imp>0 && imp>=civ+white) return {side:'imp'}; // parité : ils contrôlent le vote
+  return null;
+}
+
+/* ---------- GUESS (Mr White / imposteur classique) ---------- */
+let guessWho=null;
+function openGuess(who,idx){
+  guessWho=who;
+  $('#guess-title').textContent = who==='white'?'Mr White tente sa chance':"L'imposteur joue le tout pour le tout";
+  $('#guess-sub').textContent = `${G.names[idx]}, devine le mot secret des innocents. Bonne réponse = tu rafles la victoire.`;
+  $('#guess-input').value=''; 
+  show('#s-guess');
+  setTimeout(()=>$('#guess-input').focus(),200);
+}
+$('#guess-submit').onclick=()=>{
+  const g=norm($('#guess-input').value), target=norm(G.wordCiv);
+  const ok = g.length>1 && (g===target || (g.length>=3 && (target.includes(g)||g.includes(target))));
+  buzz(30);
+  if(ok){ sfx.win(); gameOver(guessWho); }
+  else {
+    sfx.lose();
+    if(guessWho==='white'){ proceed(); }        // white raté → il est éliminé, la partie continue
+    else { gameOver('civ'); }                    // imposteur raté → innocents gagnent
+  }
+};
+
+/* ---------- FIN DE PARTIE ---------- */
+function gameOver(side){
+  stopTimer();
+  sessionScore[side]=(sessionScore[side]||0)+1;
+  const emo=$('#res-emo'), verd=$('#res-verdict'), sub=$('#res-sub');
+  const impNames=G.names.filter((_,i)=>G.roles[i]==='imp').join(', ');
+  const whiteName=G.names.find((_,i)=>G.roles[i]==='white');
+
+  if(side==='civ'){ emo.textContent='🎉'; verd.textContent='Innocents, victoire !'; verd.className='verdict win';
+    sub.textContent='Tous les suspects ont été démasqués. Beau travail d\'équipe.'; confetti(['#29C46A','#7fe3a6','#F5B72E']); sfx.win(); }
+  else if(side==='imp'){ emo.textContent='🎭'; verd.textContent='Les imposteurs gagnent'; verd.className='verdict lose';
+    sub.textContent='Le bluff a payé. Les innocents se sont fait avoir.'; confetti(['#E23E57','#ff8fa3','#9B7BFF']); sfx.lose(); }
+  else { emo.textContent='🃏'; verd.textContent='Mr White rafle tout !'; verd.className='verdict white';
+    sub.textContent='Démasqué mais brillant : il a deviné le mot et vole la victoire à tout le monde.'; confetti(['#ffffff','#F5B72E','#6C8CFF']); sfx.win(); }
+
+  // mots
+  $('#res-word').textContent=G.wordCiv;
+  if(G.mode==='undercover'){ $('#res-word-k').textContent='Mot des innocents'; $('#res-word2-line').style.display='flex'; $('#res-word2').textContent=G.wordImp; }
+  else { $('#res-word-k').textContent='Le mot secret'; $('#res-word2-line').style.display='none'; }
+  // imposteurs
+  $('#res-imp-k').textContent = impNames.includes(',')?'Les imposteurs':'L\'imposteur';
+  $('#res-imp').textContent = impNames||'—';
+  // white
+  if(whiteName){ $('#res-white-line').style.display='flex'; $('#res-white').textContent=whiteName; $('#sc-white-box').style.display='block'; }
+  else { $('#res-white-line').style.display='none'; $('#sc-white-box').style.display='none'; }
+  // scores
+  $('#sc-civ').textContent=sessionScore.civ; $('#sc-imp').textContent=sessionScore.imp; $('#sc-white').textContent=sessionScore.white;
+
+  show('#s-result');
+}
+$('#replay').onclick=()=>{ sfx.tap(); newGame(); };
+$('#new-game').onclick=()=>{ sfx.tap(); show('#s-home'); };
+
+/* ---------- CONFETTIS ---------- */
+function confetti(colors){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const cv=$('#confetti'), ctx=cv.getContext('2d');
+  cv.width=innerWidth; cv.height=innerHeight;
+  const N=120, P=[];
+  for(let i=0;i<N;i++) P.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.4,
+    vx:(Math.random()-.5)*3,vy:2+Math.random()*4,s:5+Math.random()*7,
+    c:colors[i%colors.length],a:1,rot:Math.random()*6,vr:(Math.random()-.5)*.3});
+  let t=0;
+  (function loop(){
+    t++; ctx.clearRect(0,0,cv.width,cv.height);
+    P.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.05; p.rot+=p.vr; if(t>90)p.a-=.02;
+      ctx.save(); ctx.globalAlpha=Math.max(0,p.a); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6); ctx.restore(); });
+    if(t<160) requestAnimationFrame(loop); else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+
+/* ======================= INIT ======================= */
+renderModeUI(); renderThemes(); renderNames(); refreshCounts();
+</script>
+</body>
+</html>
