@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Imposteur</title>
+<meta name="theme-color" content="#0A0A18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Imposteur">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A18; --bg2:#100F2A; --surface:#1A1934; --surface2:#252248; --surfaceH:#2b2952; --line:#312e57;
+    --gold:#F5C542; --gold-deep:#E0930F; --velvet:#B0294A; --red:#E23E57; --red-deep:#c02745;
+    --green:#29C46A; --green-deep:#1fa257; --blue:#6C8CFF; --purple:#9B7BFF;
+    --text:#F4F4FB; --muted:#9090b8; --r:22px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;color:var(--text);overflow:hidden;
+    -webkit-user-select:none;user-select:none;
+    background:radial-gradient(120% 60% at 50% -8%,#221f4d 0%,rgba(28,26,68,0) 55%),var(--bg);
+  }
+  input,textarea{-webkit-user-select:text;user-select:text;font-family:'Inter'}
+  .app{height:100dvh;max-width:520px;margin:0 auto;position:relative}
+  h1,h2,.brand,.big,.f{font-family:'Fredoka',sans-serif}
+  .screen{position:absolute;inset:0;padding:calc(env(safe-area-inset-top) + 16px) 20px calc(env(safe-area-inset-bottom) + 18px);
+    display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .screen.active{display:flex;animation:slidein .34s cubic-bezier(.2,.7,.2,1)}
+  @keyframes slidein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  /* ---------- HERO / spotlight ---------- */
+  .hero{position:relative;display:flex;flex-direction:column;align-items:center;padding:18px 0 6px;overflow:hidden}
+  .spot{position:absolute;top:-40%;left:50%;width:340px;height:340px;transform:translateX(-50%);
+    background:radial-gradient(closest-side,rgba(245,197,66,.28),rgba(245,197,66,.05) 60%,transparent 72%);
+    filter:blur(6px);animation:pulse 5s ease-in-out infinite;pointer-events:none}
+  @keyframes pulse{0%,100%{opacity:.55;transform:translateX(-50%) scale(1)}50%{opacity:.9;transform:translateX(-50%) scale(1.08)}}
+  .mask-badge{width:76px;height:76px;border-radius:24px;background:linear-gradient(150deg,#FCD34D,var(--gold-deep));
+    display:grid;place-items:center;font-size:40px;box-shadow:0 14px 34px rgba(245,197,66,.4),inset 0 2px 6px rgba(255,255,255,.4);z-index:1}
+  .brand{font-size:42px;font-weight:700;letter-spacing:.5px;margin-top:12px;z-index:1;
+    background:linear-gradient(120deg,#FDE68A,var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tagline{text-align:center;color:var(--muted);font-size:14px;margin:6px 0 14px;line-height:1.5;z-index:1;max-width:320px}
+  .hdr-ico{position:absolute;top:calc(env(safe-area-inset-top) + 8px);display:flex;gap:8px;z-index:3}
+  .hdr-ico.left{left:2px} .hdr-ico.right{right:2px}
+  .ico{width:40px;height:40px;border-radius:50%;background:rgba(37,34,72,.7);border:1px solid var(--line);
+    display:grid;place-items:center;font-size:17px;cursor:pointer;transition:.12s;backdrop-filter:blur(6px)}
+  .ico:active{transform:scale(.9)} .ico.off{opacity:.45}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px;
+    box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+  .label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:12px}
+
+  .seg{display:flex;background:var(--surface2);border-radius:15px;padding:5px;gap:5px}
+  .seg .opt{flex:1;text-align:center;padding:11px 4px;border-radius:11px;font-family:'Fredoka';font-weight:600;font-size:15px;color:var(--muted);cursor:pointer;transition:.15s}
+  .seg .opt.on{background:linear-gradient(135deg,#FCD34D,var(--gold-deep));color:#0c0c16;box-shadow:0 4px 14px rgba(245,197,66,.32)}
+  .mode-desc{font-size:13px;color:var(--muted);margin-top:11px;line-height:1.5;min-height:18px}
+
+  .stepper{display:flex;align-items:center;justify-content:space-between}
+  .stepper .val{font-family:'Fredoka';font-size:38px;font-weight:600;min-width:56px;text-align:center}
+  .rnd-btn{width:50px;height:50px;border-radius:15px;border:1px solid var(--line);background:var(--surface2);
+    color:var(--text);font-size:24px;font-weight:600;display:grid;place-items:center;cursor:pointer;transition:.08s}
+  .rnd-btn:active{transform:scale(.9);background:var(--surfaceH)} .rnd-btn:disabled{opacity:.3}
+  .sub{color:var(--muted);font-size:12.5px;text-align:center;margin-top:8px}
+
+  .names-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+  .names-grid input{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;color:var(--text);font-size:14.5px;width:100%;outline:none}
+  .names-grid input:focus{border-color:var(--gold)}
+
+  .themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .theme{position:relative;background:var(--surface2);border:2px solid transparent;border-radius:14px;padding:12px 4px;text-align:center;cursor:pointer;transition:.15s}
+  .theme .emo{font-size:23px;display:block;margin-bottom:5px}
+  .theme .nm{font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.2}
+  .theme.sel{border-color:var(--gold);background:var(--surfaceH)} .theme.sel .nm{color:var(--text)}
+  .theme.special{border-style:dashed;border-color:var(--line)}
+  .theme:active{transform:scale(.95)}
+  .theme .edit{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#0c0c16;
+    font-size:11px;display:grid;place-items:center;border:2px solid var(--surface)}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .toggle-row .t-txt{font-size:15px;font-weight:600;font-family:'Fredoka'}
+  .toggle-row .t-sub{font-size:12.5px;color:var(--muted);margin-top:3px;font-weight:400;max-width:235px;line-height:1.45}
+  .switch{width:52px;height:31px;border-radius:20px;background:var(--surface2);border:1px solid var(--line);position:relative;cursor:pointer;flex-shrink:0;transition:.2s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#6b6b90;transition:.2s}
+  .switch.on{background:var(--green)} .switch.on::after{left:26px;background:#fff}
+
+  .btn{width:100%;border:none;border-radius:18px;padding:17px;font-family:'Fredoka';font-size:19px;font-weight:600;color:#0c0c16;cursor:pointer;transition:.08s;display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn:active{transform:scale(.97)}
+  .btn.gold{background:linear-gradient(135deg,#FCD34D,var(--gold-deep));box-shadow:0 10px 26px rgba(245,197,66,.3)}
+  .btn.green{background:linear-gradient(135deg,#3BE07F,var(--green-deep));color:#04180d;box-shadow:0 10px 26px rgba(41,196,106,.28)}
+  .btn.ghost{background:var(--surface);color:var(--text);border:1px solid var(--line);font-size:16px;padding:14px}
+  .btn.red{background:linear-gradient(135deg,#FF5A75,var(--red-deep));color:#fff}
+  .btn.sm{padding:13px;font-size:16px}
+  .spacer{flex:1;min-height:12px}
+  .stack{display:flex;flex-direction:column;gap:11px}
+  .life{display:flex;align-items:center;justify-content:center;gap:14px;color:var(--muted);font-size:12.5px;margin:10px 0 2px;font-weight:600}
+  .life b{font-family:'Fredoka'} .life .c{color:#7fe3a6} .life .i{color:#ff8fa3} .life .w{color:#fff}
+
+  /* ---------- pass / reveal ---------- */
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
+  .pass-num{font-family:'Fredoka';font-size:14px;color:var(--gold);font-weight:600;letter-spacing:2px;text-transform:uppercase}
+  .pass-name{font-family:'Fredoka';font-size:44px;font-weight:700;line-height:1.1;margin:6px 0;word-break:break-word}
+  .pass-hint{color:var(--muted);font-size:15px;max-width:290px;line-height:1.5}
+  .handoff{font-size:58px;margin-bottom:4px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.5))}
+  .progress{text-align:center;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:1px;margin-bottom:6px}
+
+  .reveal-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+  .rcard{width:100%;max-width:330px;aspect-ratio:3/4.05;position:relative;cursor:pointer;perspective:1200px}
+  .face{position:absolute;inset:0;border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:26px;text-align:center;backface-visibility:hidden;transition:transform .55s cubic-bezier(.4,.1,.2,1);border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+  .face .kicker{font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:600;opacity:.85;margin-bottom:12px}
+  .front{background:radial-gradient(120% 90% at 50% 0,#2c2957,var(--surface));transform:rotateY(0)}
+  .rcard.flip .front{transform:rotateY(180deg)} .back{transform:rotateY(-180deg)} .rcard.flip .back{transform:rotateY(0)}
+  .back.civ{background:radial-gradient(130% 100% at 50% 0,#2b3d2e,#16281a);border-color:#2c6b3f}
+  .back.imp{background:radial-gradient(130% 100% at 50% 0,#4a2130,#25101a);border-color:#7a2a3d}
+  .back.neu{background:radial-gradient(130% 100% at 50% 0,#2a2a52,#181832);border-color:#3d3d78}
+  .front .tap-icon{font-size:56px;margin-bottom:14px} .front .flip-hint{font-family:'Fredoka';font-size:21px;font-weight:600;color:var(--gold)}
+  .front .flip-sub{color:var(--muted);font-size:13.5px;margin-top:8px}
+  .back .word{font-family:'Fredoka';font-weight:700;font-size:42px;color:#fff;line-height:1.05;word-break:break-word}
+  .back .role{font-family:'Fredoka';font-size:32px;font-weight:700} .back.imp .role{color:#FF8FA3}
+  .back .desc{font-size:14px;line-height:1.5;margin-top:14px;max-width:250px;opacity:.9}
+
+  /* ---------- discuss / speaker ---------- */
+  .h2{font-family:'Fredoka';font-size:26px;font-weight:700;text-align:center}
+  .meta{text-align:center;color:var(--muted);font-size:13px;margin:4px 0 16px;font-weight:600;letter-spacing:.3px}
+  .speaker{background:linear-gradient(150deg,var(--surfaceH),var(--surface));border:1px solid var(--gold);border-radius:22px;padding:24px 18px;text-align:center;box-shadow:0 10px 30px rgba(245,197,66,.14)}
+  .speaker .who{font-family:'Fredoka';font-size:15px;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;font-weight:600}
+  .speaker .nm{font-family:'Fredoka';font-size:40px;font-weight:700;margin:6px 0;word-break:break-word}
+  .speaker .say{color:var(--muted);font-size:14px;line-height:1.5}
+  .dots{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:16px 0}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--surface2);border:1px solid var(--line);transition:.2s}
+  .dot.done{background:var(--gold-deep);border-color:var(--gold)} .dot.cur{background:var(--gold);transform:scale(1.4);box-shadow:0 0 10px var(--gold)}
+  .reminder{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:14px;font-size:13.5px;line-height:1.5;color:#c9c9e0}
+  .reminder .i{flex-shrink:0}
+  .timer{font-family:'Fredoka';font-size:52px;font-weight:700;text-align:center;letter-spacing:2px;margin:8px 0 0}
+  .timer.low{color:var(--red)}
+
+  /* ---------- vote ---------- */
+  .vote-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+  .voter{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:15px 10px;text-align:center;cursor:pointer;transition:.12s;font-family:'Fredoka';font-weight:600;font-size:15px;word-break:break-word}
+  .voter .av{font-size:24px;display:block;margin-bottom:5px} .voter:active{transform:scale(.95);border-color:var(--gold)}
+
+  /* ---------- elim / result ---------- */
+  .big-emo{font-size:70px;text-align:center;filter:drop-shadow(0 8px 20px rgba(0,0,0,.4))}
+  .role-tag{display:inline-block;font-family:'Fredoka';font-weight:700;font-size:16px;padding:6px 16px;border-radius:20px;margin-top:6px}
+  .role-tag.civ{background:rgba(41,196,106,.18);color:#7fe3a6} .role-tag.imp{background:rgba(226,62,87,.18);color:#ff8fa3} .role-tag.white{background:rgba(255,255,255,.14);color:#fff}
+  .guess-in{background:var(--surface2);border:2px solid var(--line);border-radius:16px;padding:16px;color:var(--text);font-size:20px;font-family:'Fredoka';font-weight:600;text-align:center;width:100%;outline:none}
+  .guess-in:focus{border-color:var(--gold)}
+  .verdict{font-family:'Fredoka';font-size:38px;font-weight:700;text-align:center;line-height:1.1}
+  .verdict.win{color:var(--green)} .verdict.lose{color:var(--red)} .verdict.white{color:#fff}
+  .info-line{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .info-line .k{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+  .info-line .v{font-family:'Fredoka';font-weight:600;font-size:16px;text-align:right} .info-line .v.imp{color:#FF8FA3} .info-line .v.wd{color:var(--gold)}
+  .score{display:flex;gap:10px;margin:16px 0 4px}
+  .score .sc{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center}
+  .score .sc .n{font-family:'Fredoka';font-size:30px;font-weight:700} .score .sc .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;font-weight:600}
+  .score .sc.c .n{color:#7fe3a6} .score .sc.i .n{color:#ff8fa3} .score .sc.w .n{color:#fff}
+
+  /* ---------- help / pack editor ---------- */
+  .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .top-bar .t{font-family:'Fredoka';font-size:24px;font-weight:700}
+  .ht{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:11px}
+  .ht h3{font-family:'Fredoka';font-size:17px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .ht p{font-size:14px;line-height:1.55;color:#c9c9e0}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:8px}
+  .field input,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:13px 14px;color:var(--text);font-size:15px;outline:none}
+  .field input:focus,.field textarea:focus{border-color:var(--gold)}
+  .field textarea{min-height:150px;resize:vertical;line-height:1.6}
+  .emoji-pick{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+  .emoji-pick .e{aspect-ratio:1;display:grid;place-items:center;font-size:20px;background:var(--surface2);border:2px solid transparent;border-radius:11px;cursor:pointer}
+  .emoji-pick .e.sel{border-color:var(--gold);background:var(--surfaceH)}
+  .hint-note{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.5}
+
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+  @media (prefers-reduced-motion:reduce){.screen{animation:none}.spot{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HOME ============ -->
+  <section class="screen active" id="s-home">
+    <div class="hdr-ico left"><div class="ico" id="ico-sound">🔊</div></div>
+    <div class="hdr-ico right"><div class="ico" id="ico-help">?</div></div>
+    <div class="hero">
+      <div class="spot"></div>
+      <div class="mask-badge">🎭</div>
+      <div class="brand">Imposteur</div>
+      <p class="tagline">Un mot secret pour tous… sauf l'imposteur.<br>Bluffez, débattez, démasquez-le.</p>
+    </div>
+
+    <div class="card">
+      <div class="label">Mode de jeu</div>
+      <div class="seg" id="mode-seg">
+        <div class="opt on" data-mode="classic">Classique</div>
+        <div class="opt" data-mode="undercover">Undercover</div>
+      </div>
+      <div class="mode-desc" id="mode-desc"></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Joueurs & noms</div>
+      <div class="stepper">
+        <button class="rnd-btn" id="pl-minus">−</button>
+        <div class="val" id="pl-val">4</div>
+        <button class="rnd-btn" id="pl-plus">+</button>
+      </div>
+      <div class="names-grid" id="names-grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Imposteurs</div>
+      <div class="stepper">
+        <button class="rnd-btn" id="im-minus">−</button>
+        <div class="val" id="im-val">1</div>
+        <button class="rnd-btn" id="im-plus">+</button>
+      </div>
+      <div class="sub" id="im-sub">1 imposteur parmi les joueurs</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Thème des mots</div>
+      <div class="themes" id="themes"></div>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <div><div class="t-txt">Mr White 🃏</div>
+          <div class="t-sub">Un joueur sans aucun mot. Démasqué, il peut deviner le mot pour voler la victoire.</div></div>
+        <div class="switch" id="sw-white"></div>
+      </div>
+    </div>
+
+    <div class="card" id="hint-card">
+      <div class="toggle-row">
+        <div><div class="t-txt">Indice à l'imposteur</div>
+          <div class="t-sub">Il apprend le thème (mais pas le mot). Plus facile de bluffer.</div></div>
+        <div class="switch" id="sw-hint"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <div><div class="t-txt">Minuteur de tour</div>
+          <div class="t-sub" id="timer-sub">Désactivé — débattez sans limite</div></div>
+        <div class="switch" id="sw-timer"></div>
+      </div>
+    </div>
+
+    <button class="btn green" id="start-btn">Distribuer les rôles</button>
+    <div class="life" id="life-line"></div>
+    <div style="height:4px"></div>
+  </section>
+
+  <!-- ============ HELP ============ -->
+  <section class="screen" id="s-help">
+    <div class="top-bar"><div class="t">Comment jouer</div><div class="ico" id="help-close">✕</div></div>
+    <div class="ht"><h3>🎯 Le but</h3><p>Tout le monde reçoit un mot secret, sauf l'imposteur. Les innocents doivent le démasquer ; l'imposteur doit survivre sans se faire repérer.</p></div>
+    <div class="ht"><h3>🃏 La distribution</h3><p>On se passe le téléphone. Chacun retourne sa carte en secret pour voir son rôle, puis passe au suivant.</p></div>
+    <div class="ht"><h3>💬 Le tour de parole</h3><p>Chacun son tour, dites <b>un seul mot</b> lié au mot secret — sans le dire en entier. L'imposteur improvise pour se fondre dans la masse.</p></div>
+    <div class="ht"><h3>🗳️ Le vote</h3><p>Après discussion, le groupe accuse un joueur. On révèle son rôle. Tant qu'un camp n'a pas gagné, on relance un tour avec les survivants.</p></div>
+    <div class="ht"><h3>🏆 Qui gagne ?</h3><p><b>Innocents</b> : tous les suspects éliminés. <b>Imposteurs</b> : ils deviennent aussi nombreux que les innocents. <b>Mr White</b> : démasqué, il devine le mot et rafle tout.</p></div>
+    <div class="ht"><h3>🎭 Classique vs Undercover</h3><p><b>Classique</b> : l'imposteur sait qu'il l'est, sans mot. <b>Undercover</b> : il reçoit un mot cousin (Pizza / Tarte) et ignore lui-même son rôle. À vous de sentir qui a le mot bizarre.</p></div>
+    <div class="ht"><h3>✏️ Packs perso</h3><p>Créez vos propres thèmes de mots (prénoms de la bande, blagues privées…). Ils sont sauvegardés sur cet appareil.</p></div>
+    <div class="spacer"></div>
+    <button class="btn ghost sm" id="reset-scores" style="margin-bottom:11px">Remettre le palmarès à zéro</button>
+    <button class="btn gold" id="help-back">Compris</button>
+  </section>
+
+  <!-- ============ PACK EDITOR ============ -->
+  <section class="screen" id="s-pack">
+    <div class="top-bar"><div class="t" id="pack-title">Nouveau pack</div><div class="ico" id="pack-close">✕</div></div>
+    <div class="field">
+      <label>Nom du pack</label>
+      <input id="pack-name" maxlength="18" placeholder="Ex : La bande, Films cultes…" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Icône</label>
+      <div class="emoji-pick" id="pack-emoji"></div>
+    </div>
+    <div class="field">
+      <label>Les mots (un par ligne)</label>
+      <textarea id="pack-words" placeholder="Chat&#10;Chien&#10;Cheval&#10;Lapin&#10;…" autocomplete="off"></textarea>
+      <div class="hint-note">Minimum 3 mots. En Undercover, l'imposteur reçoit un autre mot du pack au hasard.</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn gold" id="pack-save">Enregistrer le pack</button>
+      <button class="btn red sm" id="pack-delete" style="display:none">Supprimer ce pack</button>
+      <button class="btn ghost sm" id="pack-cancel">Annuler</button>
+    </div>
+  </section>
+
+  <!-- ============ PASS ============ -->
+  <section class="screen" id="s-pass">
+    <div class="progress" id="pass-prog"></div>
+    <div class="center">
+      <div class="handoff">📱➡️</div>
+      <div class="pass-num" id="pass-num"></div>
+      <div class="pass-name" id="pass-name"></div>
+      <div class="pass-hint">Prends le téléphone, découvre ton rôle en secret, puis passe-le au suivant.</div>
+    </div>
+    <button class="btn gold" id="pass-btn">Voir mon rôle</button>
+  </section>
+
+  <!-- ============ REVEAL ============ -->
+  <section class="screen" id="s-reveal">
+    <div class="progress" id="rev-name"></div>
+    <div class="reveal-wrap">
+      <div class="rcard" id="rcard">
+        <div class="face front"><div class="tap-icon">🃏</div><div class="flip-hint">Touche pour révéler</div><div class="flip-sub">Cache l'écran des autres</div></div>
+        <div class="face back" id="rcard-back"><div class="kicker" id="back-kicker"></div><div id="back-body"></div><div class="desc" id="back-desc"></div></div>
+      </div>
+    </div>
+    <button class="btn ghost" id="reveal-next" style="visibility:hidden">J'ai mémorisé →</button>
+  </section>
+
+  <!-- ============ DISCUSS ============ -->
+  <section class="screen" id="s-discuss">
+    <div class="h2" id="disc-title">Discussion</div>
+    <div class="meta" id="disc-meta"></div>
+    <div class="speaker">
+      <div class="who">À qui de parler</div>
+      <div class="nm" id="spk-name"></div>
+      <div class="say" id="spk-say">Donne un mot lié au mot secret.</div>
+    </div>
+    <div class="dots" id="spk-dots"></div>
+    <button class="btn ghost sm" id="spk-next">Suivant ▸</button>
+    <div id="disc-timerbox" style="display:none"><div class="timer" id="timer-val">1:30</div></div>
+    <div class="reminder"><span class="i">💡</span><span id="disc-reminder"></span></div>
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn gold" id="to-vote">Passer au vote</button>
+      <button class="btn ghost sm" id="discuss-quit">Quitter la partie</button>
+    </div>
+  </section>
+
+  <!-- ============ VOTE ============ -->
+  <section class="screen" id="s-vote">
+    <div class="h2">Le vote</div>
+    <p class="tagline" style="margin:8px 0 16px">Débattez, puis touchez le joueur que le groupe accuse.</p>
+    <div class="vote-grid" id="vote-grid"></div>
+    <div class="spacer"></div>
+    <button class="btn ghost sm" id="vote-back">← Retour discussion</button>
+  </section>
+
+  <!-- ============ ELIM ============ -->
+  <section class="screen" id="s-elim">
+    <div class="center" style="flex:none;margin-top:22px;gap:8px">
+      <div class="big-emo" id="elim-emo">🎭</div>
+      <div class="pass-name" id="elim-name" style="font-size:36px"></div>
+      <div id="elim-roletag"></div>
+      <p class="pass-hint" id="elim-sub" style="margin-top:10px"></p>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn gold" id="elim-next">Continuer</button>
+  </section>
+
+  <!-- ============ GUESS ============ -->
+  <section class="screen" id="s-guess">
+    <div class="center" style="flex:none;margin-top:24px;gap:8px">
+      <div class="big-emo">🎯</div>
+      <div class="h2" id="guess-title">Dernière chance</div>
+      <p class="pass-hint" id="guess-sub" style="margin-top:6px"></p>
+    </div>
+    <div style="margin-top:22px"><input class="guess-in" id="guess-input" placeholder="Le mot secret est…" autocomplete="off" autocapitalize="off"></div>
+    <div class="spacer"></div>
+    <button class="btn red" id="guess-submit">Valider ma réponse</button>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="screen" id="s-result">
+    <div class="center" style="flex:none;margin-top:8px;gap:8px">
+      <div class="big-emo" id="res-emo">🎉</div>
+      <div class="verdict" id="res-verdict"></div>
+      <p class="pass-hint" id="res-sub" style="max-width:310px"></p>
+    </div>
+    <div class="stack" style="margin-top:18px">
+      <div class="info-line" id="res-word-line"><span class="k" id="res-word-k">Le mot secret</span><span class="v wd" id="res-word">—</span></div>
+      <div class="info-line" id="res-word2-line" style="display:none"><span class="k">Mot de l'imposteur</span><span class="v imp" id="res-word2">—</span></div>
+      <div class="info-line"><span class="k" id="res-imp-k">L'imposteur</span><span class="v imp" id="res-imp">—</span></div>
+      <div class="info-line" id="res-white-line" style="display:none"><span class="k">Mr White</span><span class="v" id="res-white">—</span></div>
+    </div>
+    <div class="score">
+      <div class="sc c"><div class="n" id="sc-civ">0</div><div class="l">Innocents</div></div>
+      <div class="sc i"><div class="n" id="sc-imp">0</div><div class="l">Imposteurs</div></div>
+      <div class="sc w" id="sc-white-box" style="display:none"><div class="n" id="sc-white">0</div><div class="l">Mr White</div></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn green" id="replay">Rejouer (mêmes réglages)</button>
+      <button class="btn ghost sm" id="new-game">Nouvelle partie</button>
+    </div>
+  </section>
+
+</div>
+<canvas id="confetti"></canvas>
+
+<script>
+/* ======================= DONNÉES BUILT-IN ======================= */
+const BUILTINS = [
+  { id:'food', emo:'🍔', nm:'Miam', pairs:[['Pizza','Tarte'],['Crêpe','Galette'],['Café','Thé'],['Frites','Chips'],['Sushi','Maki'],['Burger','Sandwich'],['Chocolat','Caramel'],['Croissant','Pain au chocolat'],['Glace','Sorbet'],['Soupe','Velouté'],['Fromage','Beurre'],['Miel','Confiture'],['Yaourt','Fromage blanc'],['Gâteau','Muffin'],['Pâtes','Riz'],['Cannelle','Vanille']]},
+  { id:'anim', emo:'🐘', nm:'Animaux', pairs:[['Lion','Tigre'],['Loup','Chien'],['Dauphin','Requin'],['Grenouille','Crapaud'],['Papillon','Libellule'],['Tortue','Escargot'],['Aigle','Faucon'],['Lapin','Lièvre'],['Alligator','Crocodile'],['Abeille','Guêpe'],['Corbeau','Pie'],['Souris','Rat'],['Léopard','Guépard'],['Phoque','Otarie'],['Âne','Cheval'],['Singe','Gorille']]},
+  { id:'sport', emo:'⚽', nm:'Sport', pairs:[['Football','Rugby'],['Tennis','Badminton'],['Ski','Snowboard'],['Boxe','Karaté'],['Natation','Plongée'],['Basket','Handball'],['Course','Marathon'],['Golf','Mini-golf'],['Vélo','Moto'],['Surf','Bodyboard'],['Escalade','Randonnée'],['Patinage','Roller'],['Volley','Beach-volley'],['Judo','Lutte'],['Fléchettes','Bowling']]},
+  { id:'lieu', emo:'🗺️', nm:'Lieux', pairs:[['Plage','Piscine'],['Hôpital','Clinique'],['Cinéma','Théâtre'],['Forêt','Jungle'],['Montagne','Colline'],['Restaurant','Cantine'],['Château','Palais'],['Bibliothèque','Librairie'],['Musée','Galerie'],['Aéroport','Gare'],['Marché','Supermarché'],['Prison','Cachot'],['École','Université'],['Désert','Savane'],['Église','Cathédrale']]},
+  { id:'job', emo:'👷', nm:'Métiers', pairs:[['Médecin','Infirmier'],['Boulanger','Pâtissier'],['Policier','Gendarme'],['Pompier','Secouriste'],['Professeur','Instituteur'],['Avocat','Juge'],['Cuisinier','Serveur'],['Coiffeur','Barbier'],['Pilote','Steward'],['Chanteur','Musicien'],['Peintre','Sculpteur'],['Menuisier','Charpentier'],['Jardinier','Fleuriste'],['Journaliste','Écrivain'],['Astronaute','Cosmonaute']]},
+  { id:'obj', emo:'🪑', nm:'Objets', pairs:[['Parapluie','Parasol'],['Réveil','Montre'],['Bougie','Lampe'],['Balai','Serpillère'],['Marteau','Tournevis'],['Casque','Écouteurs'],['Valise','Sac à dos'],['Miroir','Vitre'],['Ventilateur','Climatiseur'],['Fourchette','Cuillère'],['Crayon','Stylo'],['Vélo','Trottinette'],['Couverture','Oreiller'],['Ciseaux','Couteau'],['Clé','Cadenas']]},
+  { id:'film', emo:'🎬', nm:'Ciné', pairs:[['Batman','Superman'],['Shrek','Madagascar'],['Star Wars','Star Trek'],['Harry Potter','Seigneur des Anneaux'],['Toy Story','Cars'],['Spider-Man','Iron Man'],['Le Roi Lion','Le Livre de la Jungle'],['La Reine des Neiges','Raiponce'],['Jurassic Park','King Kong'],['Matrix','Inception'],['James Bond','Mission Impossible'],['Rocky','Rambo'],['Titanic','Avatar'],['Le Parrain','Scarface']]},
+  { id:'fr', emo:'🇫🇷', nm:'France', pairs:[['Tour Eiffel','Arc de Triomphe'],['Baguette','Croissant'],['Camembert','Roquefort'],['Champagne','Vin rouge'],['Béret','Casquette'],['Métro','Tramway'],['Louvre','Versailles'],['Astérix','Tintin'],['Pétanque','Mölkky'],['TGV','RER'],['Napoléon','De Gaulle'],['Escargot','Cuisses de grenouille'],['Guyane','Martinique'],['Ariane','Soyouz']]},
+];
+const AVATARS=['🧑','👩','🧔','👱','🧑‍🦱','👩‍🦰','🧑‍🦳','👨','👩‍🦱','🧑‍🦰','👨‍🦳','👵','🧓','👴','🧑‍🦲','👲','🧕','👳','💁','🙋'];
+const PACK_EMOJIS=['📦','🎬','🎵','⚽','🍕','🐾','🌍','🚗','👾','🎮','🧪','📚','🎨','🏰','🎄','💼','🔥','⭐','🎯','🍺','😂','💀','👑','🏝️'];
+
+/* ======================= PERSISTANCE ======================= */
+const store={
+  get(k,def){ try{const v=localStorage.getItem('imp_'+k); return v==null?def:JSON.parse(v);}catch(e){return def;} },
+  set(k,v){ try{localStorage.setItem('imp_'+k,JSON.stringify(v));}catch(e){} },
+};
+let customPacks = store.get('packs',[]);
+let sessionScore = { civ:0, imp:0, white:0 };
+let lifeScore = store.get('life',{civ:0,imp:0,white:0});
+
+/* ======================= ÉTAT ======================= */
+let cfg = Object.assign({ mode:'classic', players:4, imposters:1, white:false, hint:false, timer:false, themeId:'food' }, store.get('cfg',{}));
+let savedNames = store.get('names',[]);
+let G=null, timerHandle=null, timerLeft=0;
+const TIMER_SECONDS=90;
+let sound = store.get('sound',true), audioCtx=null, lastElim=null, guessWho=null;
+let editingPackId=null, pickedEmoji=PACK_EMOJIS[0];
+
+/* ======================= UTILS ======================= */
+const $=s=>document.querySelector(s);
+const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}};
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');const el=$(id);el.scrollTop=0;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function norm(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');}
+function saveCfg(){store.set('cfg',cfg);}
+
+/* ======================= THÈMES ======================= */
+function allThemes(){ return BUILTINS.concat(customPacks); }
+function themeById(id){ return allThemes().find(t=>t.id===id); }
+function drawFromTheme(t){
+  if(t.pairs){ const p=t.pairs[Math.floor(Math.random()*t.pairs.length)]; return {civ:p[0],imp:p[1],theme:t}; }
+  const w=shuffle([...t.words]); return {civ:w[0], imp:(w[1]||w[0]), theme:t};
+}
+function drawWords(){
+  if(cfg.themeId==='mix'){ const all=allThemes(); return drawFromTheme(all[Math.floor(Math.random()*all.length)]); }
+  const t=themeById(cfg.themeId)||BUILTINS[0]; return drawFromTheme(t);
+}
+
+/* ======================= SON ======================= */
+function tone(freq,dur,type='sine',vol=.16,delay=0){
+  if(!sound||!audioCtx)return; const t=audioCtx.currentTime+delay;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.015); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t+dur+.02);
+}
+const sfx={ flip:()=>tone(520,.12,'triangle',.14), reveal:()=>{tone(440,.12,'sine',.14);tone(660,.16,'sine',.12,.08);},
+  tap:()=>tone(380,.06,'square',.08), elim:()=>{tone(180,.28,'sawtooth',.14);tone(120,.32,'sine',.12,.05);},
+  win:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.3,'triangle',.16,i*.11));},
+  lose:()=>{[440,330,247].forEach((f,i)=>tone(f,.34,'sawtooth',.14,i*.13));} };
+function initAudio(){ if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume(); }
+
+/* ======================= HOME UI ======================= */
+const MODE_DESC={ classic:"L'imposteur sait qu'il l'est et n'a aucun mot. À lui de bluffer sans se trahir.",
+  undercover:"Tout le monde a un mot, l'imposteur en a un cousin. Personne ne sait s'il est le traître : déduisez-le." };
+function renderModeUI(){
+  document.querySelectorAll('#mode-seg .opt').forEach(o=>o.classList.toggle('on',o.dataset.mode===cfg.mode));
+  $('#mode-desc').textContent=MODE_DESC[cfg.mode];
+  $('#hint-card').style.display=cfg.mode==='classic'?'':'none';
+}
+document.querySelectorAll('#mode-seg .opt').forEach(o=>o.onclick=()=>{cfg.mode=o.dataset.mode;buzz(8);sfx.tap();renderModeUI();saveCfg();});
+
+function renderThemes(){
+  const box=$('#themes'); box.innerHTML='';
+  if(!themeById(cfg.themeId) && cfg.themeId!=='mix') cfg.themeId='food';
+  allThemes().forEach(t=>{
+    const el=document.createElement('div');
+    el.className='theme'+(cfg.themeId===t.id?' sel':'');
+    el.innerHTML=`<span class="emo">${t.emo}</span><span class="nm">${t.nm}</span>`;
+    if(t.words){ // pack perso : badge d'édition
+      const b=document.createElement('div'); b.className='edit'; b.textContent='✎';
+      b.onclick=(e)=>{e.stopPropagation();openPackEditor(t.id);}; el.appendChild(b);
+    }
+    el.onclick=()=>{cfg.themeId=t.id;buzz(8);sfx.tap();renderThemes();saveCfg();};
+    box.appendChild(el);
+  });
+  // Mélange
+  const mix=document.createElement('div');
+  mix.className='theme special'+(cfg.themeId==='mix'?' sel':'');
+  mix.innerHTML=`<span class="emo">🎲</span><span class="nm">Mélange</span>`;
+  mix.onclick=()=>{cfg.themeId='mix';buzz(8);sfx.tap();renderThemes();saveCfg();};
+  box.appendChild(mix);
+  // Créer
+  const add=document.createElement('div');
+  add.className='theme special'; add.innerHTML=`<span class="emo">＋</span><span class="nm">Créer</span>`;
+  add.onclick=()=>{sfx.tap();openPackEditor(null);};
+  box.appendChild(add);
+}
+function renderNames(){
+  const grid=$('#names-grid'); const cur=[...grid.querySelectorAll('input')].map(x=>x.value);
+  grid.innerHTML='';
+  for(let i=0;i<cfg.players;i++){
+    const inp=document.createElement('input'); inp.type='text'; inp.maxLength=14; inp.placeholder=`Joueur ${i+1}`;
+    inp.value = cur[i] || savedNames[i] || '';
+    inp.oninput=()=>{ savedNames[i]=inp.value; store.set('names',savedNames); };
+    grid.appendChild(inp);
+  }
+}
+function maxImposters(){ return Math.max(1, cfg.players-2-(cfg.white?1:0)); }
+function refreshCounts(){
+  $('#pl-val').textContent=cfg.players;
+  if(cfg.imposters>maxImposters())cfg.imposters=maxImposters();
+  $('#im-val').textContent=cfg.imposters;
+  $('#im-sub').textContent=cfg.imposters===1?'1 imposteur parmi les joueurs':`${cfg.imposters} imposteurs parmi les joueurs`;
+  $('#pl-minus').disabled=cfg.players<=3; $('#pl-plus').disabled=cfg.players>=20;
+  $('#im-minus').disabled=cfg.imposters<=1; $('#im-plus').disabled=cfg.imposters>=maxImposters();
+}
+function renderLife(){
+  const L=lifeScore; const total=L.civ+L.imp+L.white;
+  $('#life-line').innerHTML = total===0 ? 'Palmarès : première partie 👀'
+    : `Palmarès à vie · <b class="c">${L.civ}</b> innocents · <b class="i">${L.imp}</b> imposteurs`+(L.white?` · <b class="w">${L.white}</b> Mr White`:'');
+}
+$('#pl-minus').onclick=()=>{if(cfg.players>3){cfg.players--;buzz(8);sfx.tap();renderNames();refreshCounts();saveCfg();}};
+$('#pl-plus').onclick =()=>{if(cfg.players<20){cfg.players++;buzz(8);sfx.tap();renderNames();refreshCounts();saveCfg();}};
+$('#im-minus').onclick=()=>{if(cfg.imposters>1){cfg.imposters--;buzz(8);sfx.tap();refreshCounts();saveCfg();}};
+$('#im-plus').onclick =()=>{if(cfg.imposters<maxImposters()){cfg.imposters++;buzz(8);sfx.tap();refreshCounts();saveCfg();}};
+$('#sw-white').onclick=function(){cfg.white=!cfg.white;this.classList.toggle('on',cfg.white);buzz(8);sfx.tap();refreshCounts();saveCfg();};
+$('#sw-hint').onclick =function(){cfg.hint=!cfg.hint;this.classList.toggle('on',cfg.hint);buzz(8);sfx.tap();saveCfg();};
+$('#sw-timer').onclick=function(){cfg.timer=!cfg.timer;this.classList.toggle('on',cfg.timer);buzz(8);sfx.tap();
+  $('#timer-sub').textContent=cfg.timer?'1 min 30 par tour':'Désactivé — débattez sans limite';saveCfg();};
+
+$('#ico-sound').onclick=function(){sound=!sound;this.textContent=sound?'🔊':'🔇';this.classList.toggle('off',!sound);store.set('sound',sound);if(sound){initAudio();sfx.tap();}};
+$('#ico-help').onclick=()=>{sfx.tap();show('#s-help');};
+$('#help-close').onclick=$('#help-back').onclick=()=>{sfx.tap();show('#s-home');};
+$('#reset-scores').onclick=function(){ lifeScore={civ:0,imp:0,white:0}; store.set('life',lifeScore); renderLife(); this.textContent='Palmarès remis à zéro ✓'; buzz(20); };
+
+/* ======================= PACK EDITOR ======================= */
+function renderEmojiPick(){
+  const box=$('#pack-emoji'); box.innerHTML='';
+  PACK_EMOJIS.forEach(e=>{
+    const el=document.createElement('div'); el.className='e'+(e===pickedEmoji?' sel':''); el.textContent=e;
+    el.onclick=()=>{pickedEmoji=e;renderEmojiPick();buzz(6);}; box.appendChild(el);
+  });
+}
+function openPackEditor(id){
+  editingPackId=id;
+  const pack = id ? customPacks.find(p=>p.id===id) : null;
+  $('#pack-title').textContent = pack?'Modifier le pack':'Nouveau pack';
+  $('#pack-name').value = pack?pack.nm:'';
+  pickedEmoji = pack?pack.emo:PACK_EMOJIS[0];
+  $('#pack-words').value = pack?pack.words.join('\n'):'';
+  $('#pack-delete').style.display = pack?'flex':'none';
+  renderEmojiPick(); show('#s-pack');
+}
+$('#pack-cancel').onclick=$('#pack-close').onclick=()=>{sfx.tap();show('#s-home');};
+$('#pack-save').onclick=()=>{
+  const nm=$('#pack-name').value.trim();
+  const words=[...new Set($('#pack-words').value.split('\n').map(w=>w.trim()).filter(w=>w.length))];
+  if(!nm){ $('#pack-name').focus(); $('#pack-name').style.borderColor='var(--red)'; return; }
+  if(words.length<3){ $('#pack-words').focus(); $('#pack-words').style.borderColor='var(--red)'; return; }
+  if(editingPackId){
+    const p=customPacks.find(x=>x.id===editingPackId); p.nm=nm; p.emo=pickedEmoji; p.words=words; cfg.themeId=p.id;
+  } else {
+    const id='custom_'+Date.now(); customPacks.push({id,emo:pickedEmoji,nm,words}); cfg.themeId=id;
+  }
+  store.set('packs',customPacks); saveCfg(); buzz(15); sfx.reveal();
+  $('#pack-name').style.borderColor=''; $('#pack-words').style.borderColor='';
+  renderThemes(); show('#s-home');
+};
+$('#pack-delete').onclick=()=>{
+  if(!editingPackId)return;
+  customPacks=customPacks.filter(p=>p.id!==editingPackId); store.set('packs',customPacks);
+  if(cfg.themeId===editingPackId){cfg.themeId='food';saveCfg();}
+  buzz(20); renderThemes(); show('#s-home');
+};
+
+/* ======================= DÉMARRAGE ======================= */
+$('#start-btn').onclick=()=>{
+  initAudio(); buzz(12); sfx.reveal();
+  const inputs=[...$('#names-grid').querySelectorAll('input')];
+  cfg.names=inputs.map((inp,i)=>inp.value.trim()||`Joueur ${i+1}`);
+  store.set('names',inputs.map(i=>i.value)); saveCfg();
+  newGame();
+};
+function newGame(){
+  const n=cfg.players; const draw=drawWords();
+  const roles=Array(n).fill('civ'); const slots=shuffle([...Array(n).keys()]); let p=0;
+  for(let k=0;k<cfg.imposters;k++) roles[slots[p++]]='imp';
+  if(cfg.white) roles[slots[p++]]='white';
+  G={ names:[...cfg.names], roles, wordCiv:draw.civ, wordImp:draw.imp, theme:draw.theme, mode:cfg.mode,
+      alive:Array(n).fill(true), revealIdx:0, round:0 };
+  goToReveal(0);
+}
+
+/* ---------- PASS / REVEAL ---------- */
+function goToReveal(i){ G.revealIdx=i; $('#pass-num').textContent=`Joueur ${i+1} / ${cfg.players}`; $('#pass-name').textContent=G.names[i]; show('#s-pass'); }
+$('#pass-btn').onclick=()=>{ sfx.tap();buzz(8);
+  const i=G.revealIdx; $('#rev-name').textContent=G.names[i]; $('#rcard').classList.remove('flip'); $('#reveal-next').style.visibility='hidden';
+  const back=$('#rcard-back'),body=$('#back-body'),desc=$('#back-desc'),kick=$('#back-kicker'); const role=G.roles[i],mode=G.mode;
+  if(role==='white'){ back.className='face back imp'; kick.textContent='Chut… 🤫'; body.innerHTML='<div class="role">Mr White</div>';
+    desc.textContent="Tu n'as aucun mot. Écoute, bluffe, et si tu te fais prendre, tente de deviner le mot pour tout rafler.";
+  } else if(mode==='classic'){
+    if(role==='imp'){ back.className='face back imp'; kick.textContent='Chut… 🤫'; body.innerHTML='<div class="role">Imposteur</div>';
+      desc.textContent=cfg.hint?`Pas de mot. Indice : thème « ${G.theme.nm} ». Bluffe pour te fondre dans la masse.`:"Tu ne connais pas le mot secret. Écoute les autres et bluffe sans te trahir.";
+    } else { back.className='face back civ'; kick.textContent='Ton mot secret'; body.innerHTML=`<div class="word">${G.wordCiv}</div>`;
+      desc.textContent="Garde-le secret. Donne un indice sans le dire… et sans être trop évident."; }
+  } else {
+    back.className='face back neu'; kick.textContent='Ton mot';
+    body.innerHTML=`<div class="word">${role==='imp'?G.wordImp:G.wordCiv}</div>`;
+    desc.textContent="Tu as peut-être le mot de la majorité… ou pas. À toi de le sentir aux indices des autres.";
+  }
+  show('#s-reveal');
+};
+$('#rcard').onclick=function(){ if(this.classList.contains('flip'))return; this.classList.add('flip');buzz(14);sfx.flip();
+  setTimeout(()=>{sfx.reveal();$('#reveal-next').style.visibility='visible';},300); };
+$('#reveal-next').onclick=()=>{ sfx.tap(); const next=G.revealIdx+1; if(next<cfg.players)goToReveal(next); else startRound(true); };
+
+/* ---------- DISCUSSION / TOUR DE PAROLE ---------- */
+function aliveIdx(){ return G.names.map((_,i)=>i).filter(i=>G.alive[i]); }
+function cnt(role){ return G.names.filter((_,i)=>G.alive[i]&&G.roles[i]===role).length; }
+function startRound(first){
+  G.round++; stopTimer();
+  const alive=aliveIdx(); const order=shuffle([...alive]);
+  const firstCiv=order.find(i=>G.roles[i]==='civ');
+  if(firstCiv!==undefined){order.splice(order.indexOf(firstCiv),1);order.unshift(firstCiv);}
+  G.order=order; G.speakPtr=0;
+  $('#disc-title').textContent=first?'Discussion':`Tour ${G.round}`;
+  const suspects=cnt('imp')+cnt('white');
+  $('#disc-meta').textContent=`${alive.length} en lice · ${suspects} suspect${suspects>1?'s':''} restant${suspects>1?'s':''}`;
+  $('#disc-reminder').innerHTML = G.mode==='undercover'
+    ? "Personne ne sait s'il est l'imposteur. Repère qui donne des indices un peu « à côté »."
+    : "L'imposteur ignore le mot : il improvise. Un indice trop vague, c'est louche.";
+  updateSpeaker();
+  const tb=$('#disc-timerbox');
+  if(cfg.timer){ tb.style.display='block'; timerLeft=TIMER_SECONDS; renderTimer();
+    timerHandle=setInterval(()=>{timerLeft--;renderTimer();if(timerLeft<=0){stopTimer();buzz([120,60,120]);sfx.lose();}},1000);
+  } else tb.style.display='none';
+  show('#s-discuss');
+}
+function updateSpeaker(){
+  const order=G.order,ptr=G.speakPtr;
+  $('#spk-name').textContent=G.names[order[ptr]];
+  const dots=$('#spk-dots'); dots.innerHTML='';
+  order.forEach((_,k)=>{ const d=document.createElement('div'); d.className='dot'+(k<ptr?' done':'')+(k===ptr?' cur':''); dots.appendChild(d); });
+  const nb=$('#spk-next');
+  if(ptr>=order.length-1){ nb.textContent='Tour de table terminé ✓'; nb.disabled=true; nb.style.opacity=.5; }
+  else { nb.textContent='Suivant ▸'; nb.disabled=false; nb.style.opacity=1; }
+}
+$('#spk-next').onclick=()=>{ if(G.speakPtr<G.order.length-1){G.speakPtr++;buzz(6);sfx.tap();updateSpeaker();} };
+function renderTimer(){ const m=Math.floor(timerLeft/60),s=timerLeft%60; const el=$('#timer-val'); el.textContent=`${m}:${s.toString().padStart(2,'0')}`; el.classList.toggle('low',timerLeft<=10); }
+function stopTimer(){ if(timerHandle){clearInterval(timerHandle);timerHandle=null;} }
+$('#to-vote').onclick=()=>{stopTimer();sfx.tap();buildVote();show('#s-vote');};
+$('#discuss-quit').onclick=()=>{stopTimer();sfx.tap();show('#s-home');};
+
+/* ---------- VOTE ---------- */
+function buildVote(){ const grid=$('#vote-grid');grid.innerHTML='';
+  aliveIdx().forEach(i=>{ const el=document.createElement('div');el.className='voter';
+    el.innerHTML=`<span class="av">${AVATARS[i%AVATARS.length]}</span>${G.names[i]}`; el.onclick=()=>onVote(i); grid.appendChild(el); }); }
+$('#vote-back').onclick=()=>{sfx.tap();startRound(false);};
+function onVote(idx){
+  buzz(30);sfx.elim(); G.alive[idx]=false; lastElim={idx,role:G.roles[idx]}; const role=G.roles[idx];
+  $('#elim-name').textContent=G.names[idx];
+  const tag=$('#elim-roletag'),emo=$('#elim-emo'),sub=$('#elim-sub');
+  if(role==='civ'){emo.textContent='😱';tag.innerHTML='<span class="role-tag civ">Innocent</span>';sub.textContent="Raté… c'était un innocent. Le suspect court toujours.";}
+  else if(role==='imp'){emo.textContent='🎯';tag.innerHTML='<span class="role-tag imp">Imposteur</span>';sub.textContent="Touché ! Un imposteur vient de tomber.";}
+  else {emo.textContent='🃏';tag.innerHTML='<span class="role-tag white">Mr White</span>';sub.textContent="C'était Mr White ! Il a droit à une dernière chance…";}
+  show('#s-elim');
+}
+$('#elim-next').onclick=()=>{sfx.tap();handlePostElim();};
+function handlePostElim(){
+  const {idx,role}=lastElim;
+  if(role==='white'){openGuess('white',idx);return;}
+  if(role==='imp'&&G.mode==='classic'&&cnt('imp')===0&&cnt('white')===0){openGuess('imp',idx);return;}
+  proceed();
+}
+function proceed(){ const w=checkWin(); if(w)return gameOver(w.side); startRound(false); }
+function checkWin(){ const imp=cnt('imp'),white=cnt('white'),civ=cnt('civ');
+  if(imp===0&&white===0)return{side:'civ'}; if(civ===0)return{side:'imp'}; if(imp>0&&imp>=civ+white)return{side:'imp'}; return null; }
+
+/* ---------- GUESS ---------- */
+function openGuess(who,idx){ guessWho=who;
+  $('#guess-title').textContent=who==='white'?'Mr White tente sa chance':"L'imposteur joue le tout pour le tout";
+  $('#guess-sub').textContent=`${G.names[idx]}, devine le mot secret des innocents. Bonne réponse = tu rafles la victoire.`;
+  $('#guess-input').value=''; show('#s-guess'); setTimeout(()=>$('#guess-input').focus(),200); }
+$('#guess-submit').onclick=()=>{
+  const g=norm($('#guess-input').value),target=norm(G.wordCiv);
+  const ok=g.length>1&&(g===target||(g.length>=3&&(target.includes(g)||g.includes(target)))); buzz(30);
+  if(ok){sfx.win();gameOver(guessWho);}
+  else { sfx.lose(); if(guessWho==='white')proceed(); else gameOver('civ'); }
+};
+
+/* ---------- FIN ---------- */
+function gameOver(side){
+  stopTimer();
+  sessionScore[side]=(sessionScore[side]||0)+1;
+  lifeScore[side]=(lifeScore[side]||0)+1; store.set('life',lifeScore);
+  const emo=$('#res-emo'),verd=$('#res-verdict'),sub=$('#res-sub');
+  const impNames=G.names.filter((_,i)=>G.roles[i]==='imp').join(', ');
+  const whiteName=G.names.find((_,i)=>G.roles[i]==='white');
+  if(side==='civ'){emo.textContent='🎉';verd.textContent='Innocents, victoire !';verd.className='verdict win';
+    sub.textContent="Tous les suspects ont été démasqués. Beau travail d'équipe.";confetti(['#29C46A','#7fe3a6','#F5C542']);sfx.win();}
+  else if(side==='imp'){emo.textContent='🎭';verd.textContent='Les imposteurs gagnent';verd.className='verdict lose';
+    sub.textContent="Le bluff a payé. Les innocents se sont fait avoir.";confetti(['#E23E57','#ff8fa3','#9B7BFF']);sfx.lose();}
+  else {emo.textContent='🃏';verd.textContent='Mr White rafle tout !';verd.className='verdict white';
+    sub.textContent="Démasqué mais brillant : il a deviné le mot et vole la victoire.";confetti(['#ffffff','#F5C542','#6C8CFF']);sfx.win();}
+  $('#res-word').textContent=G.wordCiv;
+  if(G.mode==='undercover'){$('#res-word-k').textContent='Mot des innocents';$('#res-word2-line').style.display='flex';$('#res-word2').textContent=G.wordImp;}
+  else {$('#res-word-k').textContent='Le mot secret';$('#res-word2-line').style.display='none';}
+  $('#res-imp-k').textContent=impNames.includes(',')?'Les imposteurs':"L'imposteur"; $('#res-imp').textContent=impNames||'—';
+  if(whiteName){$('#res-white-line').style.display='flex';$('#res-white').textContent=whiteName;$('#sc-white-box').style.display='block';}
+  else {$('#res-white-line').style.display='none';$('#sc-white-box').style.display='none';}
+  $('#sc-civ').textContent=sessionScore.civ;$('#sc-imp').textContent=sessionScore.imp;$('#sc-white').textContent=sessionScore.white;
+  renderLife();
+  show('#s-result');
+}
+$('#replay').onclick=()=>{sfx.tap();newGame();};
+$('#new-game').onclick=()=>{sfx.tap();renderThemes();refreshCounts();show('#s-home');};
+
+/* ---------- CONFETTIS ---------- */
+function confetti(colors){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const cv=$('#confetti'),ctx=cv.getContext('2d'); cv.width=innerWidth;cv.height=innerHeight;
+  const P=[]; for(let i=0;i<120;i++)P.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.4,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,s:5+Math.random()*7,c:colors[i%colors.length],a:1,rot:Math.random()*6,vr:(Math.random()-.5)*.3});
+  let t=0;(function loop(){t++;ctx.clearRect(0,0,cv.width,cv.height);
+    P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.05;p.rot+=p.vr;if(t>90)p.a-=.02;ctx.save();ctx.globalAlpha=Math.max(0,p.a);ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);ctx.restore();});
+    if(t<160)requestAnimationFrame(loop);else ctx.clearRect(0,0,cv.width,cv.height);})();
+}
+
+/* ======================= INIT ======================= */
+if(!sound)$('#ico-sound').textContent='🔇',$('#ico-sound').classList.add('off');
+$('#timer-sub').textContent=cfg.timer?'1 min 30 par tour':'Désactivé — débattez sans limite';
+$('#sw-white').classList.toggle('on',cfg.white);
+$('#sw-hint').classList.toggle('on',cfg.hint);
+$('#sw-timer').classList.toggle('on',cfg.timer);
+renderModeUI(); renderThemes(); renderNames(); refreshCounts(); renderLife();
+
+/* ---------- PWA ---------- */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+</script>
+</body>
+</html>
